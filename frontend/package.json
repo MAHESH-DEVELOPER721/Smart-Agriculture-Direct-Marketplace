@@ -1,5 +1,6 @@
 {
   "name": "smart-agriculture-frontend",
+  "name": "smart-agriculture-direct-marketplace",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -15,4 +16,29 @@
   "devDependencies": {
     "vite": "^5.4.14"
   }
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.18.5"
+  },
+  "devDependencies": {}
+	"name": "smart-agriculture-direct-marketplace-frontend",
+	"private": true,
+	"version": "1.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"react-router-dom": "^6.30.1"
+	},
+	"devDependencies": {
+		"@vitejs/plugin-react": "^4.3.4",
+		"vite": "^5.4.14"
+	}
 }
