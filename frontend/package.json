@@ -1,4 +1,7 @@
 {
+  "name": "smart-agriculture-direct-marketplace",
+  "version": "1.0.0",
+  "private": true,
   "name": "smart-agriculture-frontend",
   "name": "smart-agriculture-direct-marketplace",
   "private": true,
@@ -14,6 +17,8 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "vite": "^8.3.6"
+  }
     "vite": "^5.4.14"
   }
     "@vitejs/plugin-react": "^4.3.4",

@@ -1,3 +1,6 @@
+from app.models.soil import CropRecommendation, SoilTest
+
+__all__ = ["CropRecommendation", "SoilTest"]
 from app.models.drought import DroughtAlert
 from app.models.order import Order, OrderItem
 from app.models.product import Product
