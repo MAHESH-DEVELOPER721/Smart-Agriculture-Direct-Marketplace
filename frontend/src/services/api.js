@@ -1,93 +1,8 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
-
-async function postJson(path, payload) {
-  let response;
-  try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-  } catch {
-    throw new Error("Could not reach the server. Check that the backend is running.");
-  }
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => null);
-    const detail = body?.detail;
-    const message = Array.isArray(detail)
-      ? detail.map((item) => item.msg).join(", ")
-      : typeof detail === "string"
-        ? detail
-        : `Request failed (${response.status}).`;
-    throw new Error(message);
-  }
-
-  return response.json();
-}
-
-export function analyzeSoil(payload) {
-  return postJson("/soil/analyze", payload);
-}
-
-export function recommendCrops(payload) {
-  return postJson("/crop/recommend", payload);
-}
 const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  "http://localhost:8000"
 ).replace(/\/+$/, "");
-
-async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      Accept: "application/json",
-      ...(options.body ? { "Content-Type": "application/json" } : {}),
-      ...options.headers,
-    },
-  });
-
-  const responseText = await response.text();
-  let body = null;
-  if (responseText) {
-    try {
-      body = JSON.parse(responseText);
-    } catch {
-      if (response.ok) {
-        throw new Error("The server returned an invalid JSON response.");
-      }
-    }
-  }
-  if (!response.ok) {
-    const detail = body?.detail;
-    const message = Array.isArray(detail)
-      ? detail.map((item) => item.msg).join(", ")
-      : detail || `Request failed (${response.status})`;
-    throw new Error(message);
-  }
-  return body;
-}
-
-export function getProducts({ search = "", category = "", signal } = {}) {
-  const query = new URLSearchParams();
-  if (search.trim()) query.set("search", search.trim());
-  if (category && category !== "All") query.set("category", category);
-  const suffix = query.size ? `?${query}` : "";
-  return request(`/api/marketplace/products${suffix}`, { signal });
-}
-
-export function createOrder(order) {
-  return request("/api/marketplace/orders", {
-    method: "POST",
-    body: JSON.stringify(order),
-  });
-}
-
-export function getOrders(phone) {
-  const query = new URLSearchParams({ phone });
-  return request(`/api/marketplace/orders?${query}`);
-}
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export class ApiError extends Error {
   constructor(message, status) {
@@ -99,28 +14,70 @@ export class ApiError extends Error {
 
 export async function apiRequest(path, { method = "GET", body, token, ...options } = {}) {
   const headers = new Headers(options.headers || {});
+  headers.set("Accept", "application/json");
   if (body !== undefined) headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    method,
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch {
+    throw new ApiError("Could not reach the server. Check that the backend is running on http://localhost:8000.", 0);
+  }
+
   const contentType = response.headers.get("content-type") || "";
-  const data = contentType.includes("application/json") ? await response.json() : null;
+  const data = contentType.includes("application/json") ? await response.json().catch(() => null) : null;
 
   if (!response.ok) {
     const detail = data?.detail;
     const message = Array.isArray(detail)
       ? detail.map((item) => item.msg).join(" ")
-      : detail || "The request could not be completed.";
+      : detail || `Request failed (${response.status}).`;
     throw new ApiError(message, response.status);
   }
   return data;
 }
 
+// Backward-compatible helpers
+export async function postJson(path, payload) {
+  return apiRequest(path, { method: "POST", body: payload });
+}
+
+export async function request(path, options = {}) {
+  const body = options.body ? JSON.parse(options.body) : undefined;
+  return apiRequest(path, { ...options, body });
+}
+
+export function analyzeSoil(payload) {
+  return postJson("/soil/analysis", payload);
+}
+
+export function recommendCrops(payload) {
+  return postJson("/crop/recommendations", payload);
+}
+
+export function getProducts({ search = "", category = "", signal } = {}) {
+  const query = new URLSearchParams();
+  if (search.trim()) query.set("search", search.trim());
+  if (category && category !== "All") query.set("category", category);
+  const suffix = query.size ? `?${query}` : "";
+  return apiRequest(`/marketplace/products${suffix}`, { signal });
+}
+
+export function createOrder(order) {
+  return apiRequest("/marketplace/orders", { method: "POST", body: order });
+}
+
+export function getOrders(phone) {
+  return apiRequest("/marketplace/orders");
+}
+
+// Auth Session helpers
 export function saveSession(session) {
   localStorage.setItem("agri_session", JSON.stringify(session));
 }
@@ -138,6 +95,7 @@ export function clearSession() {
   localStorage.removeItem("agri_session");
 }
 
+// Marketplace Cart helpers
 export function readCart() {
   try {
     return JSON.parse(localStorage.getItem("agri_cart") || "[]");
@@ -191,4 +149,3 @@ export function clearCart() {
   localStorage.removeItem("agri_cart");
   window.dispatchEvent(new Event("agri_cart_updated"));
 }
-
