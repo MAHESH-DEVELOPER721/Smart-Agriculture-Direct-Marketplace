@@ -1,11 +1,17 @@
-from app.models.soil import CropRecommendation, SoilTest
-
-__all__ = ["CropRecommendation", "SoilTest"]
-from app.models.drought import DroughtAlert
+from app.models.drought import DroughtAlert, DroughtReading
 from app.models.order import Order, OrderItem
 from app.models.product import Product
-from app.models.soil import SoilReport
+from app.models.soil import CropRecommendation, SoilReport, SoilTest
 from app.models.user import User
 
-__all__ = ["User", "Product", "SoilReport", "DroughtAlert", "Order", "OrderItem"]
-
+__all__ = [
+    "User",
+    "Product",
+    "SoilReport",
+    "SoilTest",
+    "CropRecommendation",
+    "DroughtAlert",
+    "DroughtReading",
+    "Order",
+    "OrderItem",
+]
