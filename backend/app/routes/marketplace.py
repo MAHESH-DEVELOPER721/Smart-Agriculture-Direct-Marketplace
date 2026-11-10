@@ -6,8 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.notification import Notification
 from app.models.order import Order, OrderItem
+from app.models.payment import Payment
 from app.models.product import Product
+from app.models.user import User
 from app.schemas.marketplace import OrderCreate, ProductCreate
 
 router = APIRouter(prefix="/marketplace", tags=["Marketplace"])
@@ -298,8 +301,38 @@ def place_order(
                 )
                 db.add(order_item)
 
+            matching_user = db.query(User).filter(User.email == payload.customer_email.strip().lower()).first()
+            payment_method = (payload.payment_method or "cod").strip().lower().replace(" ", "_")
+            if payment_method not in {"upi", "debit_card", "credit_card", "net_banking", "cod"}:
+                payment_method = "cod"
+
+            payment = Payment(
+                transaction_id=f"TXN-{int(time.time() * 1000)}-{order.id}",
+                order_id=order.id,
+                user_id=matching_user.id if matching_user else None,
+                amount=round(calculated_total, 2),
+                payment_method=payment_method,
+                payment_status="pending",
+                gateway_order_id=order.order_code,
+            )
+            db.add(payment)
+
+            if matching_user:
+                db.add(
+                    Notification(
+                        user_id=matching_user.id,
+                        order_id=order.id,
+                        payment_id=payment.id,
+                        title="Order confirmed",
+                        message=f"Your order {order.order_code} has been placed and is awaiting payment confirmation.",
+                        notification_type="order_confirmed",
+                        is_read=False,
+                    )
+                )
+
             db.commit()
             db.refresh(order)
+            db.refresh(payment)
             return {
                 "id": order.order_code,
                 "order_code": order.order_code,
@@ -307,6 +340,9 @@ def place_order(
                 "total": order.total_amount,
                 "customer_name": order.customer_name,
                 "shipping_address": order.shipping_address,
+                "payment_id": payment.id,
+                "payment_status": payment.payment_status,
+                "payment_method": payment.payment_method,
                 "message": "Order successfully placed and confirmed with farmers!",
             }
         except Exception:

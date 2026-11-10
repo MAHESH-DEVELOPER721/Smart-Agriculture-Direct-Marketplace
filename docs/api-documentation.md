@@ -314,3 +314,53 @@ The **Smart Agriculture Direct Marketplace** backend is built on **FastAPI** and
 - **Endpoint**: `/marketplace/orders`
 - **Response** (`200 OK`): Array of customer orders with delivery progress and item breakdowns.
 
+---
+
+## 5. Payments & Notifications
+
+### Create Payment for an Order
+- **Method**: `POST`
+- **Endpoint**: `/payments/create`
+- **Request Body**:
+```json
+{
+  "order_id": 5,
+  "amount": 128.5,
+  "payment_method": "upi"
+}
+```
+- **Response** (`201 Created`): Payment record with a unique transaction ID and pending status.
+
+### Process a Payment
+- **Method**: `POST`
+- **Endpoint**: `/payments/{payment_id}/process`
+- **Request Body**:
+```json
+{
+  "payment_status": "succeeded",
+  "gateway_payment_id": "GW-654321",
+  "reason": "Sandbox payment approved"
+}
+```
+- **Response** (`200 OK`): Updated payment record and payment notification.
+
+### Get Payment History
+- **Method**: `GET`
+- **Endpoint**: `/payments/history?customer_id=3`
+- **Response** (`200 OK`): List of payment records for the authenticated user or admin.
+
+### List Notifications
+- **Method**: `GET`
+- **Endpoint**: `/notifications`
+- **Response** (`200 OK`): All notifications for the current user, including unread counts and type filters.
+
+### Mark Notification as Read
+- **Method**: `POST`
+- **Endpoint**: `/notifications/{notification_id}/read`
+- **Response** (`200 OK`): Updated notification status.
+
+### Mark All Notifications as Read
+- **Method**: `POST`
+- **Endpoint**: `/notifications/read-all`
+- **Response** (`200 OK`): Count of marked notifications.
+

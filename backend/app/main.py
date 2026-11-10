@@ -7,11 +7,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
 from app.routes import (
+    api_notifications_router,
     auth_router,
     crop_router,
     drought_router,
     irrigation_router,
     marketplace_router,
+    notifications_router,
+    payment_api_router,
+    payments_router,
     soil_router,
 )
 
@@ -51,6 +55,10 @@ app.include_router(crop_router)
 app.include_router(drought_router)
 app.include_router(irrigation_router)
 app.include_router(marketplace_router)
+app.include_router(payments_router)
+app.include_router(payment_api_router)
+app.include_router(notifications_router)
+app.include_router(api_notifications_router)
 app.include_router(soil_router)
 
 
