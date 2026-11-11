@@ -32,6 +32,7 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(
     title="Smart Agriculture Direct Marketplace API",
+    description="Drought monitoring and irrigation planning endpoints.",
     version="1.0.0",
     description="Authentication, crop intelligence, soil analysis, drought monitoring, irrigation planning, and marketplace services.",
     lifespan=lifespan,
@@ -42,6 +43,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ],
