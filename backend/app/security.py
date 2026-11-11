@@ -11,8 +11,16 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-only-change-this-secret")
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+JWT_SECRET_KEY = (
+    os.getenv("SECRET_KEY")
+    or os.getenv("JWT_SECRET_KEY")
+    or "dev-only-change-this-secret"
+)
+JWT_ALGORITHM = (
+    os.getenv("ALGORITHM")
+    or os.getenv("JWT_ALGORITHM")
+    or "HS256"
+)
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")

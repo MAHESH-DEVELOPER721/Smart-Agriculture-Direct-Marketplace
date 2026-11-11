@@ -58,3 +58,28 @@ yarn-error.log*
 Thumbs.db
 .vscode/
 .idea/
+# Python
+venv/
+backend/venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+
+# Database
+*.db
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/

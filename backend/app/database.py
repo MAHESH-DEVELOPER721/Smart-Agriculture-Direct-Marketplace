@@ -1,89 +1,13 @@
-import os
-from pathlib import Path
-from collections.abc import Generator
-
-from sqlalchemy import create_engine
-from sqlalchemy.engine import make_url
-from dotenv import load_dotenv
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
-
-
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise RuntimeError(
-        "DATABASE_URL is not set. Create backend/.env from backend/.env.example "
-        "and configure your PostgreSQL connection."
-    )
-
-if make_url(DATABASE_URL).drivername != "postgresql+psycopg":
-    raise RuntimeError(
-        "DATABASE_URL must use PostgreSQL with Psycopg "
-        "(postgresql+psycopg://...)."
-    )
-
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-
-def get_db() -> Generator[Session, None, None]:
-    with SessionLocal.begin() as session:
-        yield session
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
-from dotenv import load_dotenv
-
-
-DEFAULT_DATABASE_PATH = Path(__file__).resolve().parents[1] / "smart_agriculture.db"
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_DATABASE_PATH.as_posix()}")
-
-engine_options = {}
-if DATABASE_URL.startswith("sqlite"):
-    engine_options["connect_args"] = {"check_same_thread": False}
-
-engine = create_engine(DATABASE_URL, **engine_options)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-from dotenv import load_dotenv
-from sqlalchemy import URL, create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
-
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
-
-database_url = os.getenv("DATABASE_URL")
-if database_url:
-    engine_url = database_url
-else:
-    password = os.getenv("POSTGRES_PASSWORD")
-    if not password:
-        raise RuntimeError(
-            "Set POSTGRES_PASSWORD or DATABASE_URL in backend/.env before starting the API."
-        )
-    engine_url = URL.create(
-        drivername="postgresql+psycopg",
-        username=os.getenv("POSTGRES_USER", "postgres"),
-        password=password,
-        host=os.getenv("POSTGRES_HOST", "127.0.0.1"),
-        port=int(os.getenv("POSTGRES_PORT", "5432")),
-        database=os.getenv("POSTGRES_DB", "smart_agri"),
-    )
-
-engine = create_engine(engine_url, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 import logging
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL, make_url
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 logger = logging.getLogger("app.database")
 
 
@@ -161,5 +85,4 @@ def get_db():
     try:
         yield db
     finally:
-        db.close()
         db.close()
